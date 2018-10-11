@@ -1,6 +1,12 @@
 package pkgGame;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Random;
 
 import pkgHelper.LatinSquare;
@@ -15,7 +21,7 @@ import pkgHelper.LatinSquare;
  *
  */
 public class Sudoku extends LatinSquare {
-
+	private HashMap<Integer,Cell> cells = new HashMap<Integer,Cell>();
 	/**
 	 * 
 	 * iSize - the length of the width/height of the Sudoku puzzle.
@@ -268,22 +274,33 @@ public class Sudoku extends LatinSquare {
 	 * @return - returns 'true' if the proposed value is valid for the row and column
 	 */
 	public boolean isValidValue(int iRow,int iCol,  int iValue) {
-		
-		if (doesElementExist(super.getRow(iRow),iValue))
-		{
-			return false;
-		}
-		if (doesElementExist(super.getColumn(iCol),iValue))
-		{
-			return false;
-		}
+			
+		return iValue>=1 && iValue<=iSize &&
+				isValidColumnValue(iCol,iValue)&&isValidRowValue(iRow,iValue)
+				&& isValidRegionValue(iRow,iCol,iValue);
+	}
+
+	boolean isValidRegionValue(int iRow, int iCol, int iValue) {
 		if (doesElementExist(this.getRegion(iCol, iRow),iValue))
 		{
 			return false;
 		}
 		
-		return true;
-	}
+		return true;	}
+
+	boolean isValidRowValue(int iRow, int iValue) {
+		if (doesElementExist(super.getRow(iRow),iValue))
+		{
+			return false;
+		}
+		return true;	}
+
+	boolean isValidColumnValue(int iCol, int iValue) {
+		if (doesElementExist(super.getColumn(iCol),iValue))
+		{
+			return false;
+		}
+		return true;	}
 
 	/**
 	 * PrintPuzzle This method will print the puzzle to the console (space between
@@ -410,4 +427,101 @@ public class Sudoku extends LatinSquare {
 			ar[i] = a;
 		}
 	}
+	
+	public boolean isValidValue(Cell c, int iValue) {
+		return isValidValue(c.getiRow(),c.getiCol(),iValue);
+	}
+	
+	private boolean fillRemaining(Cell c) {
+		if(c ==null) {
+			return true;
+		}
+		for(int num: c.getLstValidValues()){
+			if(isValidValue(c,num)) {
+				this.getPuzzle()[c.getiRow()][c.getiCol()] = num;
+				
+				if(fillRemaining(c.getNextCell(c)))
+					return true;
+				this.getPuzzle()[c.getiRow()][c.getiCol()] = 0;
+			}
+		}
+		return false;
+	}
+	private void SetCells() {
+		for(int iRow = 0; iRow<iSize;iRow++) {
+			for(int iCol = 0; iCol<iSize;iCol++) {
+				Cell c = new Cell(iRow,iCol);
+				c.setlstValidValues(getAllValidCellValues(iCol,iRow));
+				//something else
+			}
+		}
+		
+	}
+	
+	
+	
+	private void ShowAvailableValues() {
+	}
+	
+	
+	
+	
+	private HashSet<Integer> getAllValidCellValues(int iCol,int iRow){
+		HashSet<Integer> hsCellRange = new HashSet<Integer>();
+		for(int i = 0; i<iSize;i++) {
+			hsCellRange.add(i+1);
+		}
+		HashSet<Integer> hsUsedValues = new HashSet<Integer>();
+		Collections.addAll(hsUsedValues, Arrays.stream(super.getRow(iRow)).boxed().toArray(Integer[]::new));
+		Collections.addAll(hsUsedValues, Arrays.stream(super.getColumn(iCol)).boxed().toArray(Integer[]::new));
+		Collections.addAll(hsUsedValues, Arrays.stream(this.getRegion(iCol,iRow)).boxed().toArray(Integer[]::new));
+		hsCellRange.removeAll(hsUsedValues);
+		return hsCellRange;
+	}
+	private class Cell extends java.lang.Object{
+		private int iCol;
+		private int iRow;
+		private ArrayList<Integer> lstValidValues = new ArrayList<Integer>();
+		public Cell(int iRow, int iCol) {
+			super();
+			this.iCol = iCol;
+			this.iRow = iRow;
+		}
+		public int getiCol() {
+			return iCol;
+		}
+		public int getiRow() {
+			return iRow;
+		}
+		@Override
+		public boolean equals(Object e) {
+			if(e instanceof Cell) {
+				return this.iCol == ((Cell)e).getiCol() && this.iRow == ((Cell)e).getiRow();
+			}
+			return false;
+		}
+		public ArrayList<Integer> getLstValidValues(){
+			return lstValidValues;
+		}
+		public Cell getNextCell(Cell c) {
+			if(c.getiRow() == iSize-1 && c.getiCol()==iSize-1) {
+				return null;
+			}
+			return null;
+			
+		}
+		@Override
+		public int hashCode() {
+			return Objects.hash(iRow,iCol);
+		}
+		public void setlstValidValues(HashSet<Integer> hsValidValues) {
+			lstValidValues = new ArrayList<Integer>(hsValidValues);
+		}
+		public void ShuffleValidValues() {
+			Collections.shuffle(lstValidValues);
+		}
+
+			
+	}
 }
+

@@ -17,7 +17,7 @@ public class SudokuPrivateMethodsTest {
 		System.out.println();
 	}
 
-	/*@Test
+	@Test
 	public void Sudoku_Test_SetRegion() {
 
 		Sudoku s1 = null;
@@ -171,16 +171,55 @@ public class SudokuPrivateMethodsTest {
 		} catch (InvocationTargetException e) {
 			fail("InvocationTargetException, Invalid size");
 		}
-	}*/
+	}
 @Test
 public void Sudoku_Test() {
 	try {
+		PrintStars();
+		System.out.println("Create a Sudoku and solve");
 		Sudoku S1 = new Sudoku(9);
 		S1.PrintPuzzle();
 	}
 	catch(Exception e){
 	}
 	}
+@Test
+public void ShowAValuesTest() {
+	
+	Sudoku s1  = null;
+	int iPuzzleSize = 9;
+	try {
+		Class<?> c = Class.forName("pkgGame.Sudoku");
+		Constructor constructor = c.getConstructor(new Class[] { int.class });
+		constructor.setAccessible(true);
+		s1 = (Sudoku) constructor.newInstance(iPuzzleSize);
 
+		Method mFillDiagonalRegions = c.getDeclaredMethod("FillDiagonalRegions", null);
+		Method mShowAValues = c.getDeclaredMethod("ShowAvailableValues", null);
+		PrintStars();
+		System.out.println("Show Availible Values Test");
+		mShowAValues.setAccessible(true);
+		mShowAValues.invoke(s1, null);
+
+
+		PrintStars();
+
+	} catch (ClassNotFoundException e1) {
+		fail("ClassNotFoundException");
+	} catch (NoSuchMethodException e) {
+		fail("NoSuchMethodException");
+	} catch (SecurityException e) {
+
+		fail("SecurityException");
+	} catch (InstantiationException e) {
+		fail("InstantiationException");
+	} catch (IllegalAccessException e) {
+		fail("IllegalAccessException");
+	} catch (IllegalArgumentException e) {
+		fail("IllegalArgumentException");
+	} catch (InvocationTargetException e) {
+		fail("InvocationTargetException, Invalid size");
+	}
+}
 	
 }

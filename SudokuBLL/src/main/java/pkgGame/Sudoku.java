@@ -93,6 +93,11 @@ public class Sudoku extends LatinSquare {
 		} else {
 			throw new Exception("Invalid size");
 		}
+		SetCells();
+		fillRemaining(cells.get(Objects.hash(0,iSqrtSize)));
+		if(this.isSudoku()==false) {
+			throw new Exception("Not a valid Sudoku");
+		}
 
 	}
 
@@ -336,7 +341,7 @@ public class Sudoku extends LatinSquare {
 	private void FillDiagonalRegions() {
 
 		for (int i = 0; i < iSize; i = i + iSqrtSize) {
-			System.out.println("Filling region: " + getRegionNbr(i, i));
+			
 			SetRegion(getRegionNbr(i, i));
 			ShuffleRegion(getRegionNbr(i, i));
 		}
@@ -438,9 +443,8 @@ public class Sudoku extends LatinSquare {
 		if(c ==null) {
 			return true;
 		}
-		if(c.getLstValidValues().size() == 0) {
-			if(fillRemaining(c.getNextCell(c)))
-				return true;
+		if(c.getLstValidValues().size()==1) {
+			return fillRemaining(c.getNextCell(c));
 		}
 		for(int num: c.getLstValidValues()){
 			if(isValidValue(c,num)) {
@@ -467,18 +471,30 @@ public class Sudoku extends LatinSquare {
 		
 	}
 	
-	
-	
 	private void ShowAvailableValues() {
-		//System.out.print(arg0);
+		int iCount = 1;
+		for(int i = 0;i<iSize;i++) {
+			for(int j= 0; j<iSize;j++) {
+				System.out.println("Cell #"+iCount+", Hashcode #"+Objects.hash(i,j)
+				+", Available Values "+cells.get(Objects.hash(i,j)).getLstValidValues());
+				iCount++;
+			}
+		}
 	}
+	
+
 	
 	
 	
 	
 	private HashSet<Integer> getAllValidCellValues(int iCol,int iRow){
 		HashSet<Integer> hsCellRange = new HashSet<Integer>();
-		for(int i = 0; i<iSize;i++) {
+		if(getPuzzle()[iRow][iCol]!=0) {
+			hsCellRange.add(getPuzzle()[iRow][iCol]);
+		}
+		else{
+			for(int i = 0; i<iSize;i++) {
+		
 			hsCellRange.add(i+1);
 		}
 		HashSet<Integer> hsUsedValues = new HashSet<Integer>();
@@ -486,7 +502,8 @@ public class Sudoku extends LatinSquare {
 		Collections.addAll(hsUsedValues, Arrays.stream(super.getColumn(iCol)).boxed().toArray(Integer[]::new));
 		Collections.addAll(hsUsedValues, Arrays.stream(this.getRegion(iCol,iRow)).boxed().toArray(Integer[]::new));
 		hsCellRange.removeAll(hsUsedValues);
-		return hsCellRange;
+	}
+	return hsCellRange;
 	}
 	
 	
@@ -539,7 +556,7 @@ public class Sudoku extends LatinSquare {
 		public void ShuffleValidValues() {
 			Collections.shuffle(lstValidValues);
 		}
-
+		
 			
 	}
 }
